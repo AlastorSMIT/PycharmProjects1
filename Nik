@@ -1,0 +1,97 @@
+# PyAuthomation training task: Rsync wrapper. Written by Pakholchuk Nikita
+
+# !/usr/bin/env python
+
+import re
+
+
+def parser(input_list):
+    """ Parse input list of strings and glue it into next format:
+    'rsync -params /copy/from/dirrect orfiles username:port@hostname:/copy/to/direct'
+     :returns strting """
+
+    key_list = list()
+    SINGLE_PARAM = tuple('PavSzqi')
+    WORD_PARAM = ('progress', 'password')
+
+    def remotehost_parse(hostname):
+        """ username:port@ip_address:/dir parsing """
+        delim_ind = re.search("[.,:@]", hostname)
+        username = hostname[:delim_ind.start()]
+        port = ''
+        if (hostname[delim_ind.start()] is not '@'):
+            hostname = hostname[delim_ind.end():]
+            delim_ind = re.search("[.,:@]", hostname)
+            port = hostname[: delim_ind.start()]
+        id_end = len(hostname)
+        if ('/' in hostname):
+            id_end = hostname.rfind(':')
+        host_id = '@' + hostname[delim_ind.end():id_end]
+        remote_dir = hostname[id_end:]
+        return ''.join([username, host_id, remote_dir]), port
+
+    def parse_shellkeys():
+        shell_key = list()
+        if '-e' in generator(input_list):
+            index = input_list.index('-e')
+            ssh_str = input_list[index + 1]
+            ssh_str = re.sub('[\'\"]', '', ssh_str)
+            if ssh_str.startswith('ssh'):
+                shell_key = [input_list[index], ssh_str]
+                # Refactor list for further calculations
+                del input_list[index + 1]
+                del input_list[index]
+            else:
+                del input_list[index]  # No need to store -e if there is no params for it.
+        return shell_key
+
+    def generator(iter_obj):
+        """ Generator for every case of life """
+        for item in iter_obj:
+            yield item
+
+    # Exclude -e 'ssh ...' from list
+    shell_key = parse_shellkeys()
+
+    # fill the key_list with parameters for rsync.
+    for item in generator(input_list):
+        if (item.startswith('-')):
+            if (item[1:] in WORD_PARAM):
+                key_list.append(item)
+            elif (all((x in SINGLE_PARAM) for x in item[1:])):
+                key_list.extend([('-' + char) for char in item[1:]])
+
+    key_list = [item for item in generator(key_list) if item.replace('-', '') is not '']
+
+    # Filter parameters from list and split it into other lists.
+    refact_list = list(filter(lambda x: not x.startswith('-'), generator(input_list)))
+    hostname = refact_list[-1]
+    file_list = refact_list[:-1]
+
+    # Parsing hostname
+    hostname, port = remotehost_parse(hostname)
+
+    # Add '-p port' to a -e params, if port exist
+    if (port):
+        if (shell_key):
+            shell_key[-1] = shell_key[-1] + ' -p {}'.format(port)
+            key_list.append('{} \'{}\''.format(shell_key[0], shell_key[1]))
+        else:
+            key_list.append('-e \'ssh -p {}\''.format(port))
+
+    glue_str = ' '.join(('rsync', ' '.join(key_list), ' '.join(file_list), hostname))
+
+    print (key_list, file_list, hostname)  # temp print
+
+    return glue_str
+
+
+# Lets say main
+some_list = 'whatever you -want - -- --nik --- ' \
+            '-PavSzqi -progress -password' \
+            ' another file hostname,6050@local@@;.,host:/some/dir ' \
+            '- -- --- -nik --niki'.split(
+    ' ')
+some_list.insert(0, '-e')
+some_list.insert(1, '\'ssh -P\'')
+print(parser(some_list))
