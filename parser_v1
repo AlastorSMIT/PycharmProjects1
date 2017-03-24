@@ -1,0 +1,82 @@
+import re
+
+
+class Parser:
+    @staticmethod
+    def keys_parse(input_list):
+        """ fill the key_list with parameters for rsync. """
+        SINGLE_PARAM = tuple('PavSzqi')
+        key_set = set()
+
+        def generator(some_list):
+            for item in some_list:
+                yield item
+
+        for item in generator(input_list):
+            if (item.startswith('-')):
+                if (all(ch in SINGLE_PARAM for ch in item[1:])):
+                    key_set.update([('-' + char) for char in item[1:]])
+
+        return (list(key_set))
+
+    @staticmethod
+    def remotehost_parse(hostname):
+        """ username:port@ip_address:/dir parsing """
+        delim_ind = re.search("[.,:@]", hostname)
+        username = hostname[:delim_ind.start()]
+        port = ''
+        if (hostname[delim_ind.start()] is not '@'):
+            hostname = hostname[delim_ind.end():]
+            delim_ind = re.search("[.,:@]", hostname)
+            port = hostname[: delim_ind.start()]
+        if ('/' in hostname):
+            id_end = hostname.rfind(':')
+            remote_dir = hostname[id_end:]
+        else:
+            id_end = len(hostname)
+            remote_dir = '/' + username
+        host_id = hostname[delim_ind.end():id_end]
+
+        data_dict_host = {'remote_dir': remote_dir,
+                          'username': username, 'ip': host_id,
+                          'port': port}
+
+        return data_dict_host
+
+    @staticmethod
+    def port_to_keys(date_dict_port):
+        """ Add '-p port' to a -e params, if port exist """
+        port = date_dict_port['port']
+        if (port):
+            ind = 0
+            keys_list = date_dict_port['keys']
+            key_str = '-e \'ssh -p {}\''.format(port)
+
+            if (any(item.startswith('-e') for item in keys_list)):
+                for item in keys_list:
+                    if (item.startswith('-e')):
+                        ind = keys_list.index(item)
+                keys_list[ind] = key_str
+            else:
+                keys_list.append(key_str)
+            date_dict_port['keys'] = keys_list
+
+        return date_dict_port
+
+    @staticmethod
+    def mergeDicts(d1, d2):
+        res = d1.copy()
+        for k, v in d2.iteritems():
+            if (k in d1):
+                res[k] += v
+            else:
+                res[k] = v
+
+        return res
+
+
+
+def main(data_dict):
+    data_dict['keys'] += Parser.keys_parse(data_dict['unknown'])
+    data_dict = Parser.mergeDicts(data_dict, Parser.remotehost_parse('pishpis,80@local32hj.,:@host'))
+    data_dict.update(Parser.port_to_keys(data_dict))
