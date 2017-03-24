@@ -1,0 +1,32 @@
+#!/usr/bin/python
+'''
+PyAuthomation training task: Rsync wrapper.
+Stage 1: Argparse. Takes known parameters from CLI input. Returns output_dict.
+All unknown keys stored in output_dict['unknowngarbage'].
+All recognised files,dirrectories to copy and remote dirrectory is stored in output_dict['dirs_and_files']
+'''
+import argparse
+import re
+
+output_dict = {}
+parser = argparse.ArgumentParser()
+filesgarbage = []
+unknowngarbage = []
+parser.add_argument('-process', action="count", default=0)
+parser.add_argument('-e', action="store", dest="connection", type =str)
+parser.add_argument('--pass', action="store", dest="userpass", type=str)
+parser.add_argument('files', type=str, help='list of files and dirrs to copy', nargs = '*')
+known, unknown = parser.parse_known_args()
+for i in known.files:
+    filesgarbage.append(i)
+for i in unknown:
+    unknowngarbage.append(i)
+if known.connection == 'ssh':
+    connectiontype = '-e ssh'
+elif known.connection == 'rsh':
+    connectiontype = '-e rsh'
+print(known.process)
+if known.process == 2:
+    output_dict.update({'process_flag':'-process'})
+output_dict.update({'dirs_and_files':filesgarbage, 'keys':unknowngarbage, 'password':known.userpass, 'connection':connectiontype})
+print(output_dict)
