@@ -76,7 +76,7 @@ class Parser:
 
 
 
-def main(data_dict):
-    data_dict['keys'] += Parser.keys_parse(data_dict['unknown'])
+def main(data_dict, unknown_list):
+    data_dict['keys'] += Parser.keys_parse(unknown_list)
     data_dict = Parser.mergeDicts(data_dict, Parser.remotehost_parse('pishpis,80@local32hj.,:@host'))
     data_dict.update(Parser.port_to_keys(data_dict))
