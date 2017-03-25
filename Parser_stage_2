@@ -1,24 +1,23 @@
 import re
 
 
-class Parser:
+class Parser_cls:
     @staticmethod
     def keys_parse(input_list):
         """ fill the key_list with parameters for rsync. """
         SINGLE_PARAM = tuple('PavSzqi')
         key_set = set()
 
-        for item in Parser.gen(input_list):
+        for item in Parser_cls.gen(input_list):
             if (item.startswith('-')):
-                if (all(ch in SINGLE_PARAM for ch in Parser.gen(item[1:]))):
+                if (all(ch in SINGLE_PARAM for ch in Parser_cls.gen(item[1:]))):
                     key_set.update([('-' + char) for char in item[1:]])
 
         return (list(key_set))
 
     @staticmethod
-    def hostrequest_parse(hostname_l):
+    def hostrequest_parse(hostname):
         """ username:port@ip_address:/dir parsing """
-        hostname = Parser.find_hostrequest(hostname_l)
         delim_ind = re.search("[.,:@]", hostname)
         username = hostname[:delim_ind.start()]
         port = ''
@@ -49,7 +48,7 @@ class Parser:
             keys_list = date_dict_port['keys']
             key_str = '-e \'ssh -p {}\''.format(port)
 
-            if (any(item.startswith('-e') for item in Parser.gen(keys_list))):
+            if (any(item.startswith('-e') for item in Parser_cls.gen(keys_list))):
                 for item in keys_list:
                     if (item.startswith('-e')):
                         ind = keys_list.index(item)
@@ -64,10 +63,15 @@ class Parser:
     def find_hostrequest(some_lis):
         """ Looks for last non key item in list (without '-')
             saves it as class variable """
-        for item in (Parser.gen(reversed(some_lis))):
-            if (not item.startswith('-')):
-                hostrequest = item
-                return str(hostrequest)
+        if (len(some_lis) > 1):
+            hostrequest = some_lis[-1]
+        else:
+            print ('No File/directories or \'username@hostname:/dir\' parameter')
+            exit(1)
+            hostrequest = ''
+
+        some_lis.remove(hostrequest)
+        return some_lis, str(hostrequest)
 
     @staticmethod
     def gen(some_list):
@@ -76,7 +80,15 @@ class Parser:
 
     @staticmethod
     def main(data_dict, unknown_list):
-        data_dict['keys'] += Parser.keys_parse(unknown_list)
-        data_dict.update(Parser.hostrequest_parse(unknown_list))
-        data_dict.update(Parser.port_to_keys(data_dict))
-        # print data_dict
+        data_dict['host_files'], hostname = Parser_cls.find_hostrequest(data_dict['host_files'])
+        data_dict['keys'] += Parser_cls.keys_parse(unknown_list)
+        data_dict.update(Parser_cls.hostrequest_parse(hostname))
+        data_dict.update(Parser_cls.port_to_keys(data_dict))
+        print ('#Parser.main() worked out.')
+        print (data_dict)
+        return data_dict
+        #
+        # # Data for check.
+        # data_dict = {'host_files': '', 'remote_dir': '', 'keys': [], 'username': '', 'ip': '', 'port': '', 'password': ''}
+        # unknown_list = ['some', 'str', '-SPi', '-P', 'username:90@hostname:/dir']
+        # Parser_cls.main(data_dict, unknown_list)
