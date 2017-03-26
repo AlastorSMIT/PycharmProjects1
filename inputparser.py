@@ -49,5 +49,3 @@ class Inputparser:
         Utility.print_dict(output_dict)
 
         return (output_dict, unknown)
-
-        # print inputparse()

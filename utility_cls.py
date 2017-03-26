@@ -15,4 +15,4 @@ class Utility:
     @staticmethod
     def print_client(clientlist):
         for item in Utility.gen(clientlist):
-            print item.self_print()
+            item.self_print()
