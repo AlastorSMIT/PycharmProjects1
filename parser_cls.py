@@ -1,7 +1,12 @@
 import re
+from argparsev2 import Inputparser
+from utility_cls import Utility
 
+class Parser_cls(Inputparser):
+    """Second stage parser. Parsing unknown for 'argparse' parameters 
+        and splits 'username:port@hostname:/dir' into pieces.
+        :returns dict """
 
-class Parser_cls:
     @staticmethod
     def keys_parse(input_list):
         """ fill the key_list with parameters for rsync. """
@@ -79,14 +84,21 @@ class Parser_cls:
             yield item
 
     @staticmethod
-    def main(data_dict, unknown_list):
-        data_dict['host_files'], hostname = Parser_cls.find_hostrequest(data_dict['host_files'])
-        data_dict['keys'] += Parser_cls.keys_parse(unknown_list)
-        data_dict.update(Parser_cls.hostrequest_parse(hostname))
-        data_dict.update(Parser_cls.port_to_keys(data_dict))
-        print ('#Parser.main() worked out.')
-        print (data_dict)
-        return data_dict
+    def main():
+        """ Head method of the Parser class. Calls all its method to modify and parse dictionary date.
+            :returns dict """
+        # date_dict = {'host_files': '', 'remote_dir': '', 'keys': [], 'username': '', 'ip': '', 'port': '',
+        #              'password': ''}
+
+        date_dict, unknownlist = Parser_cls.inputparse()
+        # date_dict.update(tmp_dict)
+        date_dict['host_files'], hostname = Parser_cls.find_hostrequest(date_dict['host_files'])
+        # date_dict['keys'] += Parser_cls.keys_parse(unknownlist)
+        date_dict.update(Parser_cls.hostrequest_parse(hostname))
+        date_dict.update(Parser_cls.port_to_keys(date_dict))
+        print ('###########Parser.main() worked out.##########')
+        Utility.print_dict(date_dict)
+        return date_dict
         #
         # # Data for check.
         # data_dict = {'host_files': '', 'remote_dir': '', 'keys': [], 'username': '', 'ip': '', 'port': '', 'password': ''}

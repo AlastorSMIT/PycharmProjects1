@@ -1,46 +1,55 @@
 import argparse
+from utility_cls import Utility
 
 
-def inputparse():
-    SINGLE_PARAM = tuple('PavSzqi')
+class Inputparser:
+    """ First stage parser. Using 'argparse' module to pull out all valid parameters."""
 
-    filesgarbage = []
-    known = []
+    @staticmethod
+    def inputparse():
+        """ Static method which draws out all valid parameters. Based on 'argparse' module.
+            :returns dict,list """
 
-    parser = argparse.ArgumentParser(description='\'rsync\' wrapper')
-    parser.add_argument('-process', action='store_true', default=False)
-    parser.add_argument('-pass', action="store", dest="userpass", type=str)
-    parser.add_argument('-e', action="store", dest="connection", type=str)
-    parser.add_argument('files', type=str, help='list of files and dirrs to copy', nargs='*')
-    # Fill arguments in group
-    single_args = parser.add_argument_group('Valid single letter arguments')
-    for item in SINGLE_PARAM:
-        single_args.add_argument('-{}'.format(item), action='store_true', default=False)
+        SINGLE_PARAM = tuple('PavSzqi')
 
-    args, unknown = parser.parse_known_args(['-PavSzqi', '-e ssh', '-pass=No1LiveS4ever', '-kaka',
-                                             '/abba', 'krek', 'root.22@hostname:/junk', '-kek', '-i', '-P', '-process'])
-    # ['-PavSzqi', '-RsQz', '-e ssh', '-pass=No1LiveS4ever', '-kaka', '/abba', 'krek',
-    #  'root.22@hostname:/junk', '-kek', '-i', '-P', '-process']
-    for i in args.files:
-        filesgarbage.append(i)
+        filesgarbage = []
+        known = []
 
-    if args.process:
-        known.append('-process')
+        parser = argparse.ArgumentParser(description='\'rsync\' wrapper')
+        parser.add_argument('-process', action='store_true', default=False)
+        parser.add_argument('-pass', action="store", dest="userpass", type=str)
+        parser.add_argument('-e', action="store", dest="connection", type=str)
+        parser.add_argument('files', type=str, help='list of files and dirrs to copy', nargs='*')
+        # Fill arguments in group
+        single_args = parser.add_argument_group('Valid single letter arguments')
+        for item in SINGLE_PARAM:
+            single_args.add_argument('-{}'.format(item), action='store_true', default=False)
 
-    for item in SINGLE_PARAM:
-        if (eval('args.{} is True'.format(item))):
-            known.append('-' + item)
+        args, unknown = parser.parse_known_args(['-Pav', '-q', '-e ssh', '-pass=No1LiveS4ever', '-kaka',
+                                                 '/abba', 'krek', 'username:20@hostname', '-kek',
+                                                 '-process', '--', '---', '--P'])
+        # ['-PavSzqi', '-RsQz', '-e ssh', '-pass=No1LiveS4ever', '-kaka', '/abba', 'krek',
+        #  'root.22@hostname:/junk', '-kek', '-i', '-P', '-process']
+        for i in args.files:
+            filesgarbage.append(i)
 
-    if args.connection == 'ssh':
-        known.append('-e ssh')
-    elif args.connection == 'rsh':
-        known.append('-e rsh')
+        if args.process:
+            known.append('-process')
 
-    output_dict = {'host_files': filesgarbage, 'keys': known, 'password': args.userpass}
+        for item in SINGLE_PARAM:
+            if (eval('args.{} is True'.format(item))):
+                known.append('-' + item)
 
-    print ('#Inputrser() worked out.')
-    print (output_dict)
+        if args.connection == 'ssh':
+            known.append('-e ssh')
+        elif args.connection == 'rsh':
+            known.append('-e rsh')
 
-    return (output_dict, unknown)
+        output_dict = {'host_files': filesgarbage, 'keys': known, 'password': args.userpass}
 
-# print inputparse()
+        print ('###########Inputrser() worked out.##########')
+        Utility.print_dict(output_dict)
+
+        return (output_dict, unknown)
+
+        # print inputparse()
