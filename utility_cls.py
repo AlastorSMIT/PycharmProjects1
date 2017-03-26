@@ -1,4 +1,5 @@
 # utility
+from remote_request_cls import Remote_request_cls
 
 class Utility:
     @staticmethod
@@ -10,3 +11,8 @@ class Utility:
     def print_dict(some_dict):
         for key in Utility.gen(some_dict):
             print ('{} = {}'.format(key, some_dict[key]))
+
+    @staticmethod
+    def print_client(clientlist):
+        for item in Utility.gen(clientlist):
+            print item.self_print()

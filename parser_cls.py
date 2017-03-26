@@ -1,6 +1,8 @@
 import re
-from argparsev2 import Inputparser
+from inputparser import Inputparser
 from utility_cls import Utility
+from remote_request_cls import Remote_request_cls
+
 
 class Parser_cls(Inputparser):
     """Second stage parser. Parsing unknown for 'argparse' parameters 
@@ -13,9 +15,9 @@ class Parser_cls(Inputparser):
         SINGLE_PARAM = tuple('PavSzqi')
         key_set = set()
 
-        for item in Parser_cls.gen(input_list):
+        for item in Utility.gen(input_list):
             if (item.startswith('-')):
-                if (all(ch in SINGLE_PARAM for ch in Parser_cls.gen(item[1:]))):
+                if (all(ch in SINGLE_PARAM for ch in Utility.gen(item[1:]))):
                     key_set.update([('-' + char) for char in item[1:]])
 
         return (list(key_set))
@@ -35,7 +37,7 @@ class Parser_cls(Inputparser):
             remote_dir = hostname[id_end + 1:]
         else:
             id_end = len(hostname)
-            remote_dir = '/' + username
+            remote_dir = '/$HOME'
         host_id = hostname[delim_ind.end():id_end]
 
         data_dict_host = {'remote_dir': remote_dir,
@@ -45,24 +47,22 @@ class Parser_cls(Inputparser):
         return data_dict_host
 
     @staticmethod
-    def port_to_keys(date_dict_port):
+    def port_to_keys(keys_list, port):
         """ Add '-p port' to a -e params, if port exist """
-        port = date_dict_port['port']
         if (port):
             ind = 0
-            keys_list = date_dict_port['keys']
             key_str = '-e \'ssh -p {}\''.format(port)
 
-            if (any(item.startswith('-e') for item in Parser_cls.gen(keys_list))):
-                for item in keys_list:
+            if (any(item.startswith('-e') for item in Utility.gen(keys_list))):
+                for item in Utility.gen(keys_list):
                     if (item.startswith('-e')):
                         ind = keys_list.index(item)
                 keys_list[ind] = key_str
             else:
                 keys_list.append(key_str)
-            date_dict_port['keys'] = keys_list
+            keys_list = keys_list
 
-        return date_dict_port
+        return keys_list
 
     @staticmethod
     def find_hostrequest(some_lis):
@@ -79,25 +79,23 @@ class Parser_cls(Inputparser):
         return some_lis, str(hostrequest)
 
     @staticmethod
-    def gen(some_list):
-        for item in some_list:
-            yield item
-
-    @staticmethod
     def main():
         """ Head method of the Parser class. Calls all its method to modify and parse dictionary date.
             :returns dict """
-        # date_dict = {'host_files': '', 'remote_dir': '', 'keys': [], 'username': '', 'ip': '', 'port': '',
-        #              'password': ''}
 
         date_dict, unknownlist = Parser_cls.inputparse()
-        # date_dict.update(tmp_dict)
         date_dict['host_files'], hostname = Parser_cls.find_hostrequest(date_dict['host_files'])
-        # date_dict['keys'] += Parser_cls.keys_parse(unknownlist)
-        date_dict.update(Parser_cls.hostrequest_parse(hostname))
-        date_dict.update(Parser_cls.port_to_keys(date_dict))
-        print ('###########Parser.main() worked out.##########')
-        Utility.print_dict(date_dict)
+        client_date_dict = (Parser_cls.hostrequest_parse(hostname))
+        date_dict['keys'] = (Parser_cls.port_to_keys(date_dict['keys'], client_date_dict['port']))
+        client_date_dict['password'] = date_dict['password']
+        date_dict.pop('password')
+
+        client = Remote_request_cls(client_date_dict)
+
+        if (not date_dict.has_key('client')):
+            date_dict.update({'client': []})
+        date_dict['client'].append(client)
+
         return date_dict
         #
         # # Data for check.

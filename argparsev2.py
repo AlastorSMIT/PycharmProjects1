@@ -25,9 +25,7 @@ class Inputparser:
         for item in SINGLE_PARAM:
             single_args.add_argument('-{}'.format(item), action='store_true', default=False)
 
-        args, unknown = parser.parse_known_args(['-Pav', '-q', '-e ssh', '-pass=No1LiveS4ever', '-kaka',
-                                                 '/abba', 'krek', 'username:20@hostname', '-kek',
-                                                 '-process', '--', '---', '--P'])
+        args, unknown = parser.parse_known_args()
         # ['-PavSzqi', '-RsQz', '-e ssh', '-pass=No1LiveS4ever', '-kaka', '/abba', 'krek',
         #  'root.22@hostname:/junk', '-kek', '-i', '-P', '-process']
         for i in args.files:
