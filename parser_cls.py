@@ -6,8 +6,7 @@ from remote_request_cls import Remote_request_cls
 
 class Parser_cls(Inputparser):
     """Second stage parser. Parsing unknown for 'argparse' parameters 
-        and splits 'username:port@hostname:/dir' into pieces.
-        :returns dict """
+        and splits 'username:port@hostname:/dir' into pieces. """
 
     @staticmethod
     def keys_parse(input_list):
@@ -32,12 +31,12 @@ class Parser_cls(Inputparser):
             hostname = hostname[delim_ind.end():]
             delim_ind = re.search("[.,:@]", hostname)
             port = hostname[: delim_ind.start()]
-        if ('/' in hostname):
+        if (':/' in hostname):
             id_end = hostname.rfind(':')
             remote_dir = hostname[id_end + 1:]
         else:
             id_end = len(hostname)
-            remote_dir = '/$HOME'
+            remote_dir = '/home/' + username
         host_id = hostname[delim_ind.end():id_end]
 
         data_dict_host = {'remote_dir': remote_dir,
@@ -52,13 +51,12 @@ class Parser_cls(Inputparser):
         if (port):
             ind = 0
             key_str = '-e \'ssh -p {}\''.format(port)
-
-            if (any(item.startswith('-e') for item in Utility.gen(keys_list))):
-                for item in Utility.gen(keys_list):
-                    if (item.startswith('-e')):
-                        ind = keys_list.index(item)
-                keys_list[ind] = key_str
-            else:
+            for item in Utility.gen(keys_list):
+                if (item.startswith('-e')):
+                    ind = keys_list.index(item)
+                    keys_list[ind] = key_str
+                    break
+            if (not ind):
                 keys_list.append(key_str)
             keys_list = keys_list
 
@@ -72,11 +70,11 @@ class Parser_cls(Inputparser):
             hostrequest = some_lis[-1]
         else:
             print ('No File/directories or \'username@hostname:/dir\' parameter')
-            exit(1)
+            exit(0)
             hostrequest = ''
 
         some_lis.remove(hostrequest)
-        return some_lis, str(hostrequest)
+        return some_lis, hostrequest
 
     @staticmethod
     def main():
@@ -97,8 +95,3 @@ class Parser_cls(Inputparser):
         date_dict['client'].append(client)
 
         return date_dict
-        #
-        # # Data for check.
-        # data_dict = {'host_files': '', 'remote_dir': '', 'keys': [], 'username': '', 'ip': '', 'port': '', 'password': ''}
-        # unknown_list = ['some', 'str', '-SPi', '-P', 'username:90@hostname:/dir']
-        # Parser_cls.main(data_dict, unknown_list)
