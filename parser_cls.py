@@ -81,17 +81,17 @@ class Parser_cls(Inputparser):
         """ Head method of the Parser class. Calls all its method to modify and parse dictionary date.
             :returns dict """
 
-        date_dict, unknownlist = Parser_cls.inputparse()
-        date_dict['host_files'], hostname = Parser_cls.find_hostrequest(date_dict['host_files'])
+        data_dict, unknownlist = Parser_cls.inputparse()
+        data_dict['host_files'], hostname = Parser_cls.find_hostrequest(data_dict['host_files'])
         client_date_dict = (Parser_cls.hostrequest_parse(hostname))
-        date_dict['keys'] = (Parser_cls.port_to_keys(date_dict['keys'], client_date_dict['port']))
-        client_date_dict['password'] = date_dict['password']
-        date_dict.pop('password')
+        data_dict['keys'] = (Parser_cls.port_to_keys(data_dict['keys'], client_date_dict['port']))
+        client_date_dict['password'] = data_dict['password']
+        data_dict.pop('password')
 
         client = Remote_request_cls(client_date_dict)
 
-        if (not date_dict.has_key('client')):
-            date_dict.update({'client': []})
-        date_dict['client'].append(client)
+        if (not data_dict.has_key('client')):
+            data_dict.update({'client': []})
+        data_dict['client'].append(client)
 
-        return date_dict
+        return data_dict
