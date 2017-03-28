@@ -41,8 +41,6 @@ class Remote_request_cls():
         pass
 
     def rsync_cmd(self, keys, files):
-        keys_str = ' '.join(keys)
-        files_str =  ' '.join(files)
         rsync_cmd = subprocess.Popen(['rsync','-r'] + keys + files + [self.full_adress,],
                           stdout=subprocess.PIPE)
         out,err = rsync_cmd.communicate()
