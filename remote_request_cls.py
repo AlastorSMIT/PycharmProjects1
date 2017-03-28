@@ -1,5 +1,5 @@
+import subprocess
 import os
-
 
 class Remote_request_cls():
     """ Produces objects for each remotehost machine """
@@ -27,14 +27,21 @@ class Remote_request_cls():
                 '   port: {}').format(Remote_request_cls.ind, self.username, self.adress, self.rem_dir, self.password,
                                       self.port))
 
-    def ping_meth(self):
-        pass
+    def pinger(self):
+        # pinger_dict[]
+        ping_check = os.system("ping -c1 {}".format(self.adress))
+        if not ping_check:
+            print("Host {} is alive!\n".format(self.adress))
+        else:
+            print("Host {} is dead!\n".format(self.adress))
 
     def passwordless_con(self):
         pass
 
     def rsync_cmd(self, keys, files):
-        os.system('rsync' + ' ' + ' '.join(keys) + ' ' + ' '.join(files) + ' ' + self.full_adress)
+        os.system('rsync'+' -r '+ ' '.join(keys) +' '+ ' '.join(files)+' '+ self.full_adress)
+        print ('rsync'+' -r '+ ' '.join(keys) +' '+ ' '.join(files)+' '+ self.full_adress)
+        #subprocess.popen(['rsync', ' '.join(keys), ' '.join(files), self.full_adress])
 
     @classmethod
     def self_create(cls, data_dict):

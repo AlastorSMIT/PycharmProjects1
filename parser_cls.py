@@ -31,12 +31,17 @@ class Parser_cls(Inputparser):
             hostname = hostname[delim_ind.end():]
             delim_ind = re.search("[.,:@]", hostname)
             port = hostname[: delim_ind.start()]
+
+        id_end = len(hostname)
+        if(username == 'root'):
+            remote_dir = '//root'
+        else:
+            remote_dir = '/home/' + username
+                
         if (':/' in hostname):
             id_end = hostname.rfind(':')
-            remote_dir = hostname[id_end + 1:]
-        else:
-            id_end = len(hostname)
-            remote_dir = '/home/' + username
+            remote_dir += hostname[id_end + 1:]
+            
         host_id = hostname[delim_ind.end():id_end]
 
         data_dict_host = {'remote_dir': remote_dir,
@@ -85,6 +90,7 @@ class Parser_cls(Inputparser):
         data_dict['host_files'], hostname = Parser_cls.find_hostrequest(data_dict['host_files'])
         client_date_dict = (Parser_cls.hostrequest_parse(hostname))
         data_dict['keys'] = (Parser_cls.port_to_keys(data_dict['keys'], client_date_dict['port']))
+
         client_date_dict['password'] = data_dict['password']
         data_dict.pop('password')
 

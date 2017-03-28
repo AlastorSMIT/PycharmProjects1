@@ -1,5 +1,4 @@
 # utility
-from remote_request_cls import Remote_request_cls
 
 class Utility:
     @staticmethod
@@ -16,3 +15,9 @@ class Utility:
     def print_client(clientlist):
         for item in Utility.gen(clientlist):
             item.self_print()
+
+    @staticmethod
+    def rsync_all(data_dict):
+        for item in Utility.gen(data_dict['client']):
+            item.pinger()
+            item.rsync_cmd(data_dict['keys'], data_dict['host_files'])
