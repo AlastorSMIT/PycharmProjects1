@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Useless script just to make a beautiful/userfriendly name for executing our ap.
+# Useless script just to make a beautiful/userfriendly name to execute our ap.
 
 from __init__ import main
 
